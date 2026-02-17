@@ -78,5 +78,12 @@ The models were trained using the scikit-learn machine learning library with opt
 | **Cross-Validation** | 5-fold CV for robust evaluation |
 | **Random State** | 42 (for reproducibility) |
 
+## Visualization
+
+### 1. Correlation Heatmap
+![Correlation Matrix](outputs/correlation_heatmap.png)
+
+*Displays correlation coefficients between all features, highlighting strong relationships between engagement metrics and reach.*
+
 
 
