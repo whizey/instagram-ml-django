@@ -58,3 +58,41 @@ The most influential features for predicting Instagram reach:
 | 3 | **Likes** | 0.18 | Basic engagement indicator |
 | 4 | **Comments** | 0.12 | Shows audience interaction depth |
 | 5 | **Profile Visits** | 0.07 | Indicates conversion potential |
+
+## Visualization
+
+### 1. Correlation Heatmap
+![Correlation Matrix](outputs/correlation_heatmap.png)
+
+*Displays correlation coefficients between all features, highlighting strong relationships between engagement metrics and reach.*
+
+### 2. Feature Distribution Analysis
+![Distribution Plots](outputs/feature_distributions.png)
+
+*Shows the statistical distribution of each engagement metric, revealing the skewed nature of social media data.*
+
+### 3. Actual vs Predicted Reach
+![Prediction Scatter](outputs/predictions_scatter.png)
+
+*Scatter plot comparing actual and predicted impressions, demonstrating model accuracy with the ideal diagonal line.*
+
+### 4. Residual Analysis
+![Residual Plot](outputs/residual_plot.png)
+
+*Examines prediction errors to validate model assumptions and identify systematic biases.*
+
+### 5. Feature Importance Bar Chart
+![Feature Importance](outputs/feature_importance.png)
+
+*Visualizes relative importance of each feature in determining post reach.*
+
+### 6. Impression Source Breakdown
+![Source Distribution](outputs/source_breakdown.png)
+
+*Pie chart showing the distribution of impressions across Home, Hashtags, Explore, and Other sources.*
+
+### 7. Engagement Rate vs Reach Analysis
+![Engagement Analysis](outputs/engagement_vs_reach.png)
+
+*Explores the relationship between overall engagement rate and post reach.*
+
