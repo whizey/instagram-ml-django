@@ -37,10 +37,13 @@ creators can make data-backed content decisions.
 Created three derived features to capture behavioral patterns raw 
 counts miss:
 - Engagement Rate
-- Save-to-Like Ratio  
+- Save-to-Like Ratio
 - Follower Conversion Rate
 
 ### 2. Models Trained
+
+**Impressions Prediction**
+
 | Model | R² | CV R² | MAE |
 |-------|----|-------|-----|
 | **Ridge** ✅ | **0.9485** | **0.8210** | 936.78 |
@@ -48,6 +51,20 @@ counts miss:
 | Linear Regression | 0.9360 | 0.8053 | 1026.58 |
 | Gradient Boosting | 0.9061 | 0.6435 | 743.21 |
 | Random Forest | 0.8670 | 0.6646 | 1062.64 |
+
+**Viral Score Prediction**
+
+| Model | R² | CV R² | MAE |
+|-------|----|-------|-----|
+| **Linear Regression** ✅ | **1.0000** | **1.0000** | ~0.00 |
+| Ridge | 0.9999 | 0.9998 | 0.06 |
+| Lasso | 0.9805 | 0.9478 | 1.26 |
+| Gradient Boosting | 0.8297 | 0.8819 | 2.90 |
+| Random Forest | 0.7685 | 0.8707 | 3.48 |
+
+> **Note:** Linear Regression's perfect R² = 1.000 on Viral Score 
+> indicates the target is a direct linear combination of input 
+> features — treated as a data insight, not a modeling achievement.
 
 ### 3. Validation
 - 80/20 train-test split
@@ -58,15 +75,15 @@ counts miss:
 
 ## Trade-offs
 
-**Why not Gradient Boosting?**  
-It had the lowest MAE (743.21) but its CV R² dropped to 0.6435 — 
-a sign of overfitting. Ridge generalized far better.
+**Why not Gradient Boosting?**
+Lowest MAE (743.21) but CV R² dropped to 0.6435 — a sign of 
+overfitting. Ridge generalized far better.
 
-**Why not Random Forest?**  
-Underperformed across both tasks. The data has mostly linear 
-relationships, so a complex ensemble wasn't needed.
+**Why not Random Forest?**
+Underperformed across both tasks. Data has mostly linear 
+relationships so a complex ensemble wasn't justified.
 
-**Feature engineering risk:**  
+**Feature engineering risk:**
 Derived ratios improve accuracy but assume consistent engagement 
 behavior — may not generalize to accounts with very different 
 audience sizes.
@@ -81,6 +98,3 @@ that earns bookmarks and attracts new followers — not just passive
 reactions.
 
 ---
-
-
-
