@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-instra-change-this-in-production-abc123xyz'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -51,3 +51,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Set your Anthropic API key here or via environment variable
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
