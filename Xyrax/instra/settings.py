@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-instra-change-this-in-production-abc123xyz'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -22,7 +22,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'instra.urls'
+ROOT_URLCONF = 'Xyrax.instra.urls'
 
 TEMPLATES = [
     {
@@ -37,7 +37,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'instra.wsgi.application'
+WSGI_APPLICATION = 'Xyrax.instra.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -51,4 +51,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Set your Anthropic API key here or via environment variable
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
