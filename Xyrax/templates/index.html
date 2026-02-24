@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instra — Instagram Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --p:#a855f7;--c:#06b6d4;--o:#fb923c;--g:#34d399;--pk:#f472b6;--r:#ef4444;
+  --bg:#060610;--s1:rgba(255,255,255,.018);--tx:rgba(225,225,255,.92);--mu:rgba(175,175,215,.38);
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --fm:'SF Mono','Fira Code',monospace;
+}
+html{background:var(--bg);}
+body{height:100vh;width:100vw;overflow:hidden;background:var(--bg);color:var(--tx);font-family:var(--f);font-size:14px;line-height:1.5;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 900px 700px at 5% 50%,rgba(100,40,255,.09) 0%,transparent 65%),
+    radial-gradient(ellipse 700px 500px at 95% 25%,rgba(0,180,200,.07) 0%,transparent 65%),
+    radial-gradient(ellipse 400px 400px at 50% 100%,rgba(240,120,40,.04) 0%,transparent 65%);}
+.app{display:flex;height:100vh;width:100vw;position:relative;z-index:1;}
+.sidebar{width:100px;min-width:100px;flex-shrink:0;margin:.8rem 0 .8rem .8rem;
+  background:var(--s1);border:1px solid rgba(168,85,247,.2);border-radius:20px;
+  backdrop-filter:blur(40px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 20px 60px rgba(0,0,0,.6),0 0 35px rgba(168,85,247,.22);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.6rem;padding:1.2rem .4rem;overflow:hidden;position:relative;}
+.sidebar::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(168,85,247,.95),rgba(6,182,212,.85),transparent);}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.3rem;width:82%;padding:.65rem .25rem;
+  border-radius:14px;border:1px solid transparent;background:transparent;cursor:pointer;
+  text-decoration:none;transition:all .25s;color:rgba(120,120,170,.35);}
+.nav-item:hover{background:rgba(255,255,255,.04);color:rgba(180,180,220,.7);}
+.nav-item.active{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.09);}
+.nav-item.active svg{filter:drop-shadow(0 0 7px currentColor) drop-shadow(0 0 14px currentColor);}
+.nav-label{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.main{flex:1;margin:.8rem .8rem .8rem 0;background:var(--s1);border:1px solid rgba(100,60,255,.18);
+  border-radius:20px;backdrop-filter:blur(40px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 30px 80px rgba(0,0,0,.5),0 0 45px rgba(168,85,247,.18);
+  overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.main::before{content:'';position:absolute;top:0;left:5%;right:5%;height:1px;z-index:2;
+  background:linear-gradient(90deg,transparent,rgba(168,85,247,.95),rgba(6,182,212,.9),transparent);}
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;padding:1.5rem 1.8rem;
+  opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .3s,transform .3s;}
+.page.active{opacity:1;pointer-events:all;transform:translateY(0);}
+.page::-webkit-scrollbar{width:3px;}
+.page::-webkit-scrollbar-thumb{background:rgba(120,80,255,.25);border-radius:99px;}
+.page-title{font-size:21px;font-weight:800;margin-bottom:3px;
+  background:linear-gradient(135deg,var(--p),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{color:var(--mu);font-size:11px;margin-bottom:14px;}
+.sec-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;
+  color:rgba(160,160,210,.28);margin-bottom:7px;margin-top:13px;}
+.card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;padding:13px 15px;transition:all .2s;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);}
+.card:hover{transform:translateY(-2px);}
+.card.p{border-color:rgba(168,85,247,.2);}.card.c{border-color:rgba(6,182,212,.2);}
+.card.o{border-color:rgba(251,146,60,.2);}.card.g{border-color:rgba(52,211,153,.2);}
+.card-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(160,160,210,.35);margin-bottom:4px;}
+.card-val{font-size:21px;font-weight:800;line-height:1.1;}
+.card-sub{font-size:10px;color:rgba(160,160,210,.35);margin-top:3px;}
+.cp{color:var(--p);}.cc{color:var(--c);}.co{color:var(--o);}.cg{color:var(--g);}.cpk{color:var(--pk);}
+.btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6d28d9,#0891b2);
+  border:none;border-radius:50px;color:#fff;font-family:var(--f);font-size:12px;font-weight:700;
+  padding:9px 20px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  box-shadow:0 0 28px rgba(109,40,217,.35);transition:all .3s;}
+.btn:hover{box-shadow:0 0 48px rgba(109,40,217,.55);transform:translateY(-2px);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sm{font-size:10px;padding:6px 14px;}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);box-shadow:none;color:var(--tx);}
+.btn-ghost:hover{background:rgba(255,255,255,.09);box-shadow:none;transform:none;}
+.btn-red{background:linear-gradient(135deg,#991b1b,#7f1d1d);}
+.hero{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:calc(100vh - 110px);}
+.badge{display:inline-flex;align-items:center;gap:5px;background:rgba(168,85,247,.09);
+  border:1px solid rgba(168,85,247,.22);border-radius:99px;padding:4px 12px;
+  font-size:10px;font-weight:700;color:var(--p);margin-bottom:12px;}
+.hero-h{font-size:34px;font-weight:800;line-height:1.1;margin-bottom:10px;}
+.g1{background:linear-gradient(135deg,#fff,rgba(255,255,255,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.g2{background:linear-gradient(135deg,var(--p),var(--c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:13px;color:var(--mu);line-height:1.7;max-width:460px;margin-bottom:20px;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px;width:100%;max-width:560px;}
+.feat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+  border-radius:13px;padding:14px;transition:all .25s;text-align:left;}
+.feat:hover{transform:translateY(-2px);background:rgba(255,255,255,.03);}
+.feat-icon{font-size:20px;margin-bottom:7px;}
+.feat-title{font-size:12px;font-weight:700;margin-bottom:4px;}
+.feat-desc{font-size:11px;color:var(--mu);line-height:1.6;}
+.inp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;}
+.inp-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:7px 11px 5px;transition:all .2s;}
+.inp-card:hover{border-color:rgba(120,80,255,.25);}
+.inp-card:focus-within{border-color:rgba(120,80,255,.45);background:rgba(120,80,255,.05);}
+.inp-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px;display:block;}
+input[type=number]{background:transparent;border:none;outline:none;width:100%;
+  color:rgba(220,220,255,.9);font-family:var(--fm);font-size:14px;font-weight:600;padding:2px 0;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.csv-zone{background:rgba(168,85,247,.04);border:1.5px dashed rgba(168,85,247,.22);
+  border-radius:11px;padding:11px 15px;margin-bottom:11px;cursor:pointer;transition:all .2s;}
+.csv-zone:hover{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.45);}
+.csv-zone.loaded{background:rgba(52,211,153,.04);border-color:rgba(52,211,153,.3);}
+.csv-title{font-size:11px;font-weight:700;color:var(--p);margin-bottom:2px;}
+.csv-sub{font-size:10px;color:var(--mu);}
+.csv-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(52,211,153,.1);
+  border:1px solid rgba(52,211,153,.3);border-radius:99px;padding:2px 10px;
+  font-size:10px;font-weight:700;color:var(--g);margin-top:5px;}
+.history-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px;}
+.h-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:8px;padding:7px;text-align:center;}
+.h-stat-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:rgba(160,160,210,.35);margin-bottom:2px;}
+.h-stat-val{font-size:15px;font-weight:800;}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.viral-badge{display:inline-flex;align-items:center;border-radius:8px;padding:5px 12px;
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin:3px 0 12px;border-left:3px solid;}
+.insight-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}
+.ins-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.065);
+  border-radius:12px;padding:11px 13px;position:relative;}
+.ins-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);}
+.ins-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;}
+.proj-row{display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;}
+.proj-row:last-child{border-bottom:none;}
+.time-row{display:flex;align-items:flex-start;justify-content:space-between;
+  padding:5px 8px;border-radius:6px;margin:3px 0;font-size:11px;
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);}
+.time-row.best{background:rgba(6,182,212,.05);border-color:rgba(6,182,212,.15);}
+.forecast-panel{background:rgba(52,211,153,.03);border:1px solid rgba(52,211,153,.14);
+  border-radius:13px;padding:11px 15px;margin-bottom:10px;}
+.forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px;}
+.f-stat{background:rgba(255,255,255,.02);border:1px solid rgba(52,211,153,.1);border-radius:8px;padding:7px 9px;}
+.f-stat-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:rgba(160,160,210,.35);margin-bottom:2px;}
+.f-stat-val{font-size:15px;font-weight:800;color:var(--g);}
+.charts-row{display:grid;grid-template-columns:3fr 2fr;gap:7px;margin-bottom:9px;}
+.chart-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.065);
+  border-radius:12px;padding:11px 13px;}
+.chart-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:rgba(160,160,210,.28);margin-bottom:7px;}
+.chart-wrap{height:110px;position:relative;}
+.chart-wrap-tall{height:150px;position:relative;}
+.ai-box{background:rgba(100,55,255,.04);border:1px solid rgba(100,55,255,.12);
+  border-radius:13px;padding:14px 17px;font-size:12px;line-height:1.85;
+  color:rgba(205,205,255,.82);margin-bottom:12px;position:relative;}
+.ai-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(100,55,255,.45),transparent);}
+.ai-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.lever-list{margin-top:6px;display:flex;flex-direction:column;gap:5px;}
+.lever{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;padding:6px 10px;font-size:11px;line-height:1.6;
+  border-left:2px solid var(--p);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.trend{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
+.trend.up{background:rgba(52,211,153,.1);color:var(--g);border:1px solid rgba(52,211,153,.2);}
+.trend.down{background:rgba(239,68,68,.1);color:var(--r);border:1px solid rgba(239,68,68,.2);}
+.trend.stable{background:rgba(6,182,212,.1);color:var(--c);border:1px solid rgba(6,182,212,.2);}
+.history-table{width:100%;border-collapse:collapse;font-size:11px;}
+.history-table th{font-size:9px;text-transform:uppercase;letter-spacing:.09em;
+  color:rgba(160,160,210,.35);padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;}
+.history-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);}
+.history-table tr:hover td{background:rgba(255,255,255,.02);}
+.badge-sm{display:inline-block;padding:2px 8px;border-radius:99px;font-size:9px;font-weight:700;border:1px solid;}
+/* AGENT */
+.agent-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.agent-ctx{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-shrink:0;
+  background:rgba(168,85,247,.04);border-bottom:1px solid rgba(168,85,247,.1);}
+.agent-ctx-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;
+  padding:3px 10px;border-radius:99px;border:1px solid;}
+.ctx-green{background:rgba(52,211,153,.08);color:var(--g);border-color:rgba(52,211,153,.2);}
+.ctx-purple{background:rgba(168,85,247,.08);color:var(--p);border-color:rgba(168,85,247,.2);}
+.ctx-blue{background:rgba(6,182,212,.08);color:var(--c);border-color:rgba(6,182,212,.2);}
+.ctx-label{font-size:10px;color:var(--mu);margin-left:auto;}
+.agent-msgs{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.agent-msgs::-webkit-scrollbar{width:3px;}
+.agent-msgs::-webkit-scrollbar-thumb{background:rgba(120,80,255,.25);border-radius:99px;}
+.agent-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex:1;text-align:center;padding:24px;gap:10px;}
+.agent-welcome-icon{font-size:36px;margin-bottom:4px;}
+.agent-welcome-title{font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--p),var(--c));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.agent-welcome-sub{font-size:12px;color:var(--mu);max-width:380px;line-height:1.7;}
+.agent-suggestions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px;}
+.sug-chip{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:99px;padding:6px 13px;font-size:11px;color:rgba(200,200,240,.7);
+  cursor:pointer;transition:all .2s;}
+.sug-chip:hover{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.25);color:var(--p);}
+.msg{display:flex;gap:9px;animation:msgIn .25s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;}
+.msg-avatar{width:28px;height:28px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
+.msg-avatar.ai{background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(6,182,212,.2));
+  border:1px solid rgba(168,85,247,.2);}
+.msg-avatar.user{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}
+.msg-bubble{max-width:82%;padding:10px 13px;border-radius:13px;font-size:12px;line-height:1.75;}
+.msg-bubble.ai{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-bottom-left-radius:4px;color:rgba(220,220,255,.88);}
+.msg-bubble.user{background:linear-gradient(135deg,rgba(109,40,217,.35),rgba(8,145,178,.25));
+  border:1px solid rgba(168,85,247,.2);border-bottom-right-radius:4px;
+  color:rgba(230,230,255,.92);text-align:right;}
+.msg-bubble.ai strong{color:rgba(240,240,255,.95);font-weight:700;}
+.msg-bubble.ai .ai-num{color:var(--p);font-weight:600;}
+.msg-bubble.ai ul{margin:6px 0 2px 14px;display:flex;flex-direction:column;gap:3px;}
+.typing{display:flex;align-items:center;gap:4px;padding:2px 0;}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--p);opacity:.4;animation:blink 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.4}40%{opacity:1}}
+.agent-input-bar{display:flex;gap:8px;padding:12px 16px;flex-shrink:0;
+  border-top:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.01);}
+.agent-input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:9px 14px;color:var(--tx);font-family:var(--f);font-size:13px;
+  outline:none;resize:none;min-height:40px;max-height:120px;line-height:1.5;transition:border-color .2s;}
+.agent-input:focus{border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.04);}
+.agent-input::placeholder{color:var(--mu);}
+.agent-send{width:40px;height:40px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6d28d9,#0891b2);color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 0 20px rgba(109,40,217,.3);transition:all .2s;}
+.agent-send:hover{box-shadow:0 0 32px rgba(109,40,217,.5);transform:scale(1.05);}
+.agent-send:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="sidebar">
+    <a class="nav-item active" id="nav-home" onclick="go('home')" style="color:var(--p)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="nav-label">Home</span>
+    </a>
+    <a class="nav-item" id="nav-predict" onclick="go('predict');loadPredictHistory();" style="color:rgba(120,120,170,.35)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      <span class="nav-label">Predict</span>
+    </a>
+    <a class="nav-item" id="nav-dashboard" onclick="go('dashboard')" style="color:rgba(120,120,170,.35)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/></svg>
+      <span class="nav-label">Analytics</span>
+    </a>
+    <a class="nav-item" id="nav-history" onclick="go('history');loadHistory();" style="color:rgba(120,120,170,.35)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="nav-label">History</span>
+    </a>
+    <a class="nav-item" id="nav-agent" onclick="go('agent');initAgent();" style="color:rgba(120,120,170,.35)">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 4-3 6-5 7v1H10v-1C8 15 5 13 5 9a7 7 0 017-7z"/><rect x="10" y="17" width="4" height="2" rx="1"/><path d="M10 21h4"/></svg>
+      <span class="nav-label">Agent</span>
+    </a>
+    <div style="position:absolute;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div id="status-dot" style="width:8px;height:8px;border-radius:50%;background:transparent;transition:all .4s;"></div>
+      <span id="status-lbl" style="font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:transparent;"> </span>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="pages">
+
+      <!-- HOME -->
+      <div class="page active" id="page-home">
+        <div class="hero">
+          <div class="badge">✶ Instagram Analytics</div>
+          <h1 class="hero-h"><span class="g1">Grow your</span><br><span class="g2">Instagram faster</span></h1>
+          <p class="hero-sub">Analyse your posts, track patterns over time, and get AI-powered insights — all from your own data.</p>
+          <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:22px;">
+            <button class="btn" onclick="go('predict');loadPredictHistory();">🚀 Analyze My Post</button>
+            <button class="btn btn-ghost btn-sm" onclick="go('agent');initAgent();">🤖 Ask the Agent</button>
+          </div>
+          <div class="feat-grid">
+            <div class="feat" style="border-color:rgba(168,85,247,.18);cursor:pointer;" onclick="go('predict');loadPredictHistory();"><div class="feat-icon">🚀</div><div class="feat-title" style="color:var(--p);">Predict</div><div class="feat-desc">Enter your post metrics and optionally upload a CSV of past posts. Get predicted impressions, viral score, and best posting times instantly.</div></div>
+            <div class="feat" style="border-color:rgba(6,182,212,.18);cursor:pointer;" onclick="go('dashboard')"><div class="feat-icon">📊</div><div class="feat-title" style="color:var(--c);">Analytics</div><div class="feat-desc">See your engagement breakdown, metric radar, and trend charts. Shows how your post compares to your historical average.</div></div>
+            <div class="feat" style="border-color:rgba(167,139,250,.18);cursor:pointer;" onclick="go('agent');initAgent();"><div class="feat-icon">🤖</div><div class="feat-title" style="color:#a78bfa;">Agent</div><div class="feat-desc">Chat with an AI that has read all your post data. Ask it anything — content plans, why a post underperformed, what to post next.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREDICT -->
+      <div class="page" id="page-predict">
+        <div style="min-height:calc(100vh - 110px);display:flex;flex-direction:column;justify-content:center;align-items:center;">
+          <div style="width:100%;max-width:640px;">
+            <div class="page-title">Analyze Your Post</div>
+            <div class="page-sub">Fill in your post metrics — optionally upload past posts CSV for deeper insights</div>
+            <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this.files[0])">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;">
+              <div>
+                <div class="csv-zone" id="csv-zone" onclick="document.getElementById('csv-input').click()">
+                  <div class="csv-title">📂 Upload Past Posts CSV</div>
+                  <div class="csv-sub" id="csv-sub">Click to upload · agent merges with your history<br><small style="opacity:.55">Columns: likes, saves, comments, shares, follows, profile_visits, caption_length, hashtags, reposts</small></div>
+                  <div id="csv-badge-wrap"></div>
+                </div>
+                <div id="history-preview" style="display:none;margin-top:6px;">
+                  <div class="sec-label">CSV Averages</div>
+                  <div class="history-mini" id="history-mini-grid"></div>
+                </div>
+              </div>
+              <div>
+                <div class="sec-label" style="margin-top:0;">Recent Posts</div>
+                <div id="predict-history-content" style="font-size:11px;color:var(--mu);">Loading…</div>
+              </div>
+            </div>
+            <div class="sec-label">Current Post — Instagram Insights</div>
+            <div class="inp-grid">
+              <div class="inp-card"><label class="inp-lbl" style="color:#f87171;">❤️ Likes</label><input type="number" id="in-likes" value="151"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#60a5fa;">📤 Shares</label><input type="number" id="in-shares" value="6"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#34d399;">➕ New Follows</label><input type="number" id="in-follows" value="8"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#c084fc;">💬 Comments</label><input type="number" id="in-comments" value="6"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#fb923c;">👀 Profile Visits</label><input type="number" id="in-profile_visits" value="23"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#fcd34d;">📝 Caption Length</label><input type="number" id="in-caption_length" value="150"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#f472b6;">🔖 Saves</label><input type="number" id="in-saves" value="109"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#a78bfa;">🔁 Reposts</label><input type="number" id="in-reposts" value="0"></div>
+              <div class="inp-card"><label class="inp-lbl" style="color:#67e8f9;">#️⃣ Hashtags</label><input type="number" id="in-hashtags" value="20"></div>
+            </div>
+            <div style="display:flex;justify-content:center;margin-top:16px;">
+              <button class="btn" id="analyze-btn" onclick="analyze()">🚀 Analyze Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD (redesigned) -->
+      <div class="page" id="page-dashboard" style="padding:0;overflow-y:auto;">
+      <style>
+        /* ── Redesigned dashboard styles ── */
+        #page-dashboard { font-family:'Instrument Sans','Segoe UI',sans-serif; }
+        #page-dashboard .r-wrap { max-width:860px; margin:0 auto; padding:28px 24px 60px; }
+        #page-dashboard .r-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap; }
+        #page-dashboard .r-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:24px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#e8e8f0,rgba(255,255,255,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px; }
+        #page-dashboard .r-meta { font-size:12px;color:#7070a0; }
+        /* verdict banner */
+        #page-dashboard .verdict-banner { border-radius:14px;padding:14px 20px;margin-bottom:22px;display:flex;align-items:center;gap:14px;animation:rSlideIn .4s ease; }
+        @keyframes rSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+        #page-dashboard .v-emoji { font-size:26px;flex-shrink:0; }
+        #page-dashboard .v-label { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:17px;font-weight:800;letter-spacing:-.2px; }
+        #page-dashboard .v-explain { font-size:11px;margin-top:2px;opacity:.65; }
+        /* section label */
+        #page-dashboard .r-section { font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3a3a5c;margin-bottom:11px;margin-top:26px;display:flex;align-items:center;gap:8px; }
+        #page-dashboard .r-section::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.07); }
+        /* metric cards */
+        #page-dashboard .r-metrics { display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:9px; }
+        #page-dashboard .r-metric { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 14px;position:relative;overflow:hidden;transition:transform .2s;animation:rFadeUp .5s ease both; }
+        #page-dashboard .r-metric:hover { transform:translateY(-2px); }
+        #page-dashboard .r-metric::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--rm-accent,rgba(255,255,255,.1)); }
+        #page-dashboard .r-metric:nth-child(1){animation-delay:.05s}
+        #page-dashboard .r-metric:nth-child(2){animation-delay:.10s}
+        #page-dashboard .r-metric:nth-child(3){animation-delay:.15s}
+        #page-dashboard .r-metric:nth-child(4){animation-delay:.20s}
+        @keyframes rFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        #page-dashboard .r-m-icon { font-size:17px;margin-bottom:7px; }
+        #page-dashboard .r-m-name { font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7070a0;margin-bottom:5px; }
+        #page-dashboard .r-m-val { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:5px; }
+        #page-dashboard .r-m-plain { font-size:11px;color:#7070a0;line-height:1.5; }
+        #page-dashboard .r-m-delta { display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:6px; }
+        #page-dashboard .delta-up { background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2); }
+        #page-dashboard .delta-down { background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2); }
+        /* two col */
+        #page-dashboard .r-two { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+        /* panel */
+        #page-dashboard .r-panel { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 18px; }
+        #page-dashboard .r-panel-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:13px;font-weight:800;letter-spacing:-.2px;margin-bottom:3px; }
+        #page-dashboard .r-panel-sub { font-size:11px;color:#7070a0;margin-bottom:14px; }
+        /* projections */
+        #page-dashboard .r-proj-item { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05); }
+        #page-dashboard .r-proj-item:last-child { border-bottom:none; }
+        #page-dashboard .r-proj-label { font-size:11px;color:#7070a0;min-width:120px; }
+        #page-dashboard .r-proj-bar-wrap { flex:1;background:rgba(255,255,255,.04);border-radius:99px;height:5px;overflow:hidden; }
+        #page-dashboard .r-proj-bar { height:100%;border-radius:99px;transition:width 1s cubic-bezier(.22,1,.36,1); }
+        #page-dashboard .r-proj-val { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-weight:800;font-size:13px;min-width:58px;text-align:right; }
+        /* times */
+        #page-dashboard .r-time-item { display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-radius:9px;margin-bottom:5px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);transition:background .2s; }
+        #page-dashboard .r-time-item.best { background:rgba(45,212,191,.05);border-color:rgba(45,212,191,.15); }
+        #page-dashboard .r-time-slot { font-size:12px;font-weight:600; }
+        #page-dashboard .r-time-why { font-size:10px;color:#7070a0;margin-top:2px; }
+        #page-dashboard .r-time-tag { font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:99px; }
+        #page-dashboard .tag-best { background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.25); }
+        #page-dashboard .tag-good { background:rgba(255,255,255,.04);color:#7070a0;border:1px solid rgba(255,255,255,.07); }
+        /* forecast panel */
+        #page-dashboard .r-forecast { background:rgba(74,222,128,.03);border:1px solid rgba(74,222,128,.12);border-radius:14px;padding:13px 16px;margin-bottom:9px; }
+        #page-dashboard .r-forecast-head { display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px; }
+        #page-dashboard .r-forecast-title { font-size:11px;font-weight:700;color:#4ade80; }
+        #page-dashboard .r-forecast-chips { display:flex;gap:5px; }
+        #page-dashboard .r-f-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px; }
+        #page-dashboard .r-f-stat { background:rgba(255,255,255,.02);border:1px solid rgba(74,222,128,.1);border-radius:8px;padding:7px 9px; }
+        #page-dashboard .r-f-lbl { font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:#7070a0;margin-bottom:2px; }
+        #page-dashboard .r-f-val { font-size:15px;font-weight:800;color:#4ade80; }
+        #page-dashboard .r-charts-row { display:grid;grid-template-columns:3fr 2fr;gap:8px;margin-bottom:9px; }
+        /* ai section */
+        #page-dashboard .r-ai { background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.15);border-radius:15px;padding:18px 20px;margin-bottom:9px;position:relative;overflow:hidden; }
+        #page-dashboard .r-ai::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.5),transparent); }
+        #page-dashboard .r-ai-block { margin-bottom:18px; }
+        #page-dashboard .r-ai-block:last-child { margin-bottom:0; }
+        #page-dashboard .r-ai-tag { display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:99px;margin-bottom:9px; }
+        #page-dashboard .tag-diag { background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.25); }
+        #page-dashboard .tag-lever { background:rgba(45,212,191,.1);color:#2dd4bf;border:1px solid rgba(45,212,191,.25); }
+        #page-dashboard .tag-time-ai { background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25); }
+        #page-dashboard .r-ai-text { font-size:13px;color:rgba(232,232,240,.82);line-height:1.75; }
+        #page-dashboard .r-lever-cards { display:flex;flex-direction:column;gap:7px; }
+        #page-dashboard .r-lever { background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 13px;border-left:3px solid;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start; }
+        #page-dashboard .r-lever-text { font-size:12px;line-height:1.6;color:rgba(232,232,240,.85); }
+        #page-dashboard .r-lever-badge { font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap; }
+        /* chart panels */
+        #page-dashboard .r-chart-panel { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 18px; }
+        #page-dashboard .r-chart-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:12px;font-weight:800;margin-bottom:2px; }
+        #page-dashboard .r-chart-sub { font-size:10px;color:#7070a0;margin-bottom:12px; }
+        #page-dashboard .r-chart-wrap { height:120px;position:relative; }
+        #page-dashboard .r-chart-wrap-tall { height:145px;position:relative; }
+      </style>
+
+      <div class="r-wrap">
+        <!-- Header -->
+        <div class="r-header">
+          <div>
+            <div class="r-title">Your Post Report</div>
+            <div class="r-meta" id="d-sub">Run a post analysis to see your results</div>
+          </div>
+        </div>
+
+        <!-- Verdict banner -->
+        <div class="verdict-banner" id="d-viral-badge" style="display:none;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);">
+          <div class="v-emoji" id="v-emoji">⚡</div>
+          <div>
+            <div class="v-label" id="v-label" style="color:#fb923c;">Moderate Potential</div>
+            <div class="v-explain" id="v-explain" style="color:#fb923c;">Your post is doing okay — a few tweaks could push it further.</div>
+          </div>
+        </div>
+
+        <!-- Metric cards -->
+        <div class="r-section">What your post scored</div>
+        <div class="r-metrics">
+          <div class="r-metric" style="--rm-accent:linear-gradient(90deg,#a78bfa,#60a5fa);">
+            <div class="r-m-icon">👀</div>
+            <div class="r-m-name">People who saw it</div>
+            <div class="r-m-val" id="d-impressions" style="color:#a78bfa;">–</div>
+            <div class="r-m-plain">Instagram showed your post to this many accounts, including non-followers.</div>
+            <div class="r-m-delta delta-up" id="d-imp-sub" style="display:none;"></div>
+          </div>
+          <div class="r-metric" style="--rm-accent:linear-gradient(90deg,#2dd4bf,#60a5fa);">
+            <div class="r-m-icon">⚡</div>
+            <div class="r-m-name">Overall quality score</div>
+            <div class="r-m-val" style="color:#2dd4bf;"><span id="d-viral">–</span><span style="font-size:13px;opacity:.4">/100</span></div>
+            <div class="r-m-plain">Combines saves, engagement & follows. <strong style="color:#2dd4bf;">Above 65</strong> = viral territory.</div>
+          </div>
+          <div class="r-metric" style="--rm-accent:linear-gradient(90deg,#fbbf24,#f472b6);">
+            <div class="r-m-icon">💬</div>
+            <div class="r-m-name">Interaction rate</div>
+            <div class="r-m-val" id="d-eng" style="color:#fbbf24;">–</div>
+            <div class="r-m-plain">Of people who saw it, this % liked, saved, commented or shared. Target: 5%+.</div>
+          </div>
+          <div class="r-metric" style="--rm-accent:linear-gradient(90deg,#4ade80,#2dd4bf);">
+            <div class="r-m-icon">➕</div>
+            <div class="r-m-name">Visitors who followed</div>
+            <div class="r-m-val" id="d-follow" style="color:#4ade80;">–</div>
+            <div class="r-m-plain">Of profile visitors from this post who hit Follow.</div>
+          </div>
+        </div>
+
+        <!-- Forecast panel (multi-post) -->
+        <div id="forecast-panel" style="display:none;">
+          <div class="r-section">Patterns across all your posts</div>
+          <div class="r-forecast">
+            <div class="r-forecast-head">
+              <span class="r-forecast-title" id="forecast-headline">–</span>
+              <div class="r-forecast-chips" id="forecast-trends"></div>
+            </div>
+            <div class="r-f-grid" id="forecast-grid"></div>
+          </div>
+          <div class="r-charts-row">
+            <div class="r-chart-panel"><div class="r-chart-title">How far your posts have been traveling</div><div class="r-chart-sub">Smoothed impression trend over your posts</div><div class="r-chart-wrap-tall"><canvas id="trendChart"></canvas></div></div>
+            <div class="r-chart-panel"><div class="r-chart-title">Are people bookmarking more?</div><div class="r-chart-sub">Saves/likes ratio over time</div><div class="r-chart-wrap-tall"><canvas id="savesRatioChart"></canvas></div></div>
+          </div>
+        </div>
+
+        <!-- Growth & timing -->
+        <div class="r-section">Growth & best timing</div>
+        <div class="r-two">
+          <!-- Projections -->
+          <div class="r-panel">
+            <div class="r-panel-title">📈 What improvement looks like</div>
+            <div class="r-panel-sub">If you follow the tips below, here's how your reach could grow</div>
+            <div class="r-proj-item">
+              <div class="r-proj-label" style="color:#7070a0;">Right now</div>
+              <div class="r-proj-bar-wrap"><div class="r-proj-bar" id="proj-bar-current" style="width:60%;background:rgba(255,255,255,.15);"></div></div>
+              <div class="r-proj-val" id="d-proj-current" style="color:#7070a0;">–</div>
+            </div>
+            <div class="r-proj-item">
+              <div class="r-proj-label" style="color:#4ade80;">Small tweaks (+25%)</div>
+              <div class="r-proj-bar-wrap"><div class="r-proj-bar" id="proj-bar-25" style="width:75%;background:#4ade80;opacity:.7;"></div></div>
+              <div class="r-proj-val" id="d-proj-25" style="color:#4ade80;">–</div>
+            </div>
+            <div class="r-proj-item">
+              <div class="r-proj-label" style="color:#2dd4bf;">All tips applied (+60%)</div>
+              <div class="r-proj-bar-wrap"><div class="r-proj-bar" id="proj-bar-opt" style="width:100%;background:#2dd4bf;opacity:.7;"></div></div>
+              <div class="r-proj-val" id="d-proj-opt" style="color:#2dd4bf;">–</div>
+            </div>
+            <div class="r-proj-item" id="next-forecast-row" style="display:none;">
+              <div class="r-proj-label" style="color:#fb923c;">Next post forecast</div>
+              <div class="r-proj-bar-wrap"><div class="r-proj-bar" style="width:80%;background:#fb923c;opacity:.7;"></div></div>
+              <div class="r-proj-val" id="d-next-forecast" style="color:#fb923c;">–</div>
+            </div>
+          </div>
+          <!-- Best times -->
+          <div class="r-panel">
+            <div class="r-panel-title">🕐 When to post next</div>
+            <div class="r-panel-sub">Your audience is most active and save-happy at these times</div>
+            <div id="d-times"></div>
+          </div>
+        </div>
+
+        <!-- AI Strategy -->
+        <div class="r-section">AI growth strategy</div>
+        <div class="r-ai" id="ai-strategy-box">
+          <div style="color:#7070a0;font-size:12px;">Run an analysis to see your AI strategy.</div>
+        </div>
+
+        <!-- Charts -->
+        <div class="r-section">This post vs your historical average</div>
+        <div class="r-two">
+          <div class="r-chart-panel">
+            <div class="r-chart-title">How each metric compared</div>
+            <div class="r-chart-sub">Purple = this post · Teal = your average past post</div>
+            <div class="r-chart-wrap"><canvas id="barChart"></canvas></div>
+          </div>
+          <div class="r-chart-panel">
+            <div class="r-chart-title">Your strengths map</div>
+            <div class="r-chart-sub">The bigger the shape, the more balanced & strong your post</div>
+            <div class="r-chart-wrap"><canvas id="radarChart"></canvas></div>
+          </div>
+        </div>
+
+      </div><!-- /r-wrap -->
+      </div>
+
+      <!-- HISTORY -->
+      <div class="page" id="page-history">
+        <div class="page-title">Post History</div>
+        <div class="page-sub">All posts stored in SQLite database for this session</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button class="btn btn-sm" onclick="loadHistory()">🔄 Refresh</button>
+          <button class="btn btn-sm btn-ghost btn-red" onclick="clearHistory()">🗑 Clear History</button>
+        </div>
+        <div id="history-content"><div style="color:var(--mu);font-size:12px;">Loading...</div></div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="page" id="page-agent" style="padding:0;overflow:hidden;">
+        <div class="agent-wrap">
+          <div class="agent-ctx">
+            <span style="font-size:11px;font-weight:700;color:var(--p);">🤖 Strategy Agent</span>
+            <div class="agent-ctx-chip ctx-purple" id="ctx-posts">0 posts loaded</div>
+            <div class="agent-ctx-chip ctx-green" id="ctx-forecast" style="display:none;">📈 Forecasting active</div>
+            <div class="agent-ctx-chip ctx-blue" id="ctx-score" style="display:none;"></div>
+            <span class="ctx-label" id="ctx-label">Analyze a post first for personalized advice</span>
+          </div>
+          <div class="agent-msgs" id="agent-msgs">
+            <div class="agent-welcome" id="agent-welcome">
+              <div class="agent-welcome-icon">🤖</div>
+              <div class="agent-welcome-title">Instagram Strategy Agent</div>
+              <div class="agent-welcome-sub" id="agent-welcome-sub">I've read your post history and run it through the forecasting model. Ask me anything — content ideas, why a post underperformed, what to post next week, or build a full content calendar.</div>
+              <div class="agent-suggestions">
+                <div class="sug-chip" onclick="sendSuggestion(this)">What should I post next?</div>
+                <div class="sug-chip" onclick="sendSuggestion(this)">Why are my saves low?</div>
+                <div class="sug-chip" onclick="sendSuggestion(this)">Build me a 7-day content plan</div>
+                <div class="sug-chip" onclick="sendSuggestion(this)">What's my strongest metric?</div>
+                <div class="sug-chip" onclick="sendSuggestion(this)">How do I get more followers?</div>
+                <div class="sug-chip" onclick="sendSuggestion(this)">Analyse my best vs worst post</div>
+              </div>
+            </div>
+          </div>
+          <div class="agent-input-bar">
+            <textarea class="agent-input" id="agent-input" placeholder="Ask your strategy agent anything…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAgent();}"></textarea>
+            <button class="agent-send" id="agent-send-btn" onclick="sendAgent()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const NC = {home:'#a855f7', predict:'#06b6d4', dashboard:'#fb923c', history:'#f472b6', agent:'#a78bfa'};
+let barChartInst=null,radarChartInst=null,trendChartInst=null,savesRatioChartInst=null;
+let csvPosts=[], agentHistory=[], agentCtxLoaded=false;
+let SESSION_KEY=localStorage.getItem('instra_session');
+if(!SESSION_KEY){SESSION_KEY='sess_'+Math.random().toString(36).slice(2)+Date.now();localStorage.setItem('instra_session',SESSION_KEY);}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  loadPredictHistory(); checkBackend(); setInterval(checkBackend,15000);
+  const ta=document.getElementById('agent-input');
+  if(ta)ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,120)+'px';});
+});
+
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');n.style.color='rgba(120,120,170,.35)';});
+  document.getElementById('page-'+page).classList.add('active');
+  const nav=document.getElementById('nav-'+page);
+  nav.classList.add('active'); nav.style.color=NC[page];
+}
+
+async function checkBackend(){
+  const dot=document.getElementById('status-dot'),lbl=document.getElementById('status-lbl');
+  try{
+    const res=await fetch('/api/history/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_key:SESSION_KEY}),signal:AbortSignal.timeout(4000)});
+    if(res.ok){dot.style.background='#34d399';dot.style.boxShadow='0 0 8px #34d399';lbl.textContent='live';lbl.style.color='#34d399';}
+  }catch(e){}
+}
+
+function handleCSV(file){
+  if(!file||!file.name.endsWith('.csv'))return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const lines=e.target.result.trim().split('\n').filter(l=>l.trim());
+    if(lines.length<2)return;
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/[^a-z_]/g,''));
+    const keyMap={likes:'likes',saves:'saves',comments:'comments',shares:'shares',follows:'follows',new_follows:'follows',profile_visits:'profile_visits',caption_length:'caption_length',hashtags:'hashtags',reposts:'reposts'};
+    csvPosts=[];
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(','),post={};
+      headers.forEach((h,idx)=>{const mk=keyMap[h];if(mk)post[mk]=parseInt(vals[idx])||0;});
+      if(Object.keys(post).length>=3)csvPosts.push(post);
+    }
+    if(csvPosts.length>0){const last=csvPosts[csvPosts.length-1];Object.entries(last).forEach(([k,v])=>{const el=document.getElementById('in-'+k);if(el)el.value=v;});}
+    document.getElementById('csv-zone').classList.add('loaded');
+    document.getElementById('csv-sub').innerHTML='<span style="color:var(--g);font-weight:700;">✓ '+file.name+'</span>';
+    document.getElementById('csv-badge-wrap').innerHTML='<div class="csv-badge">📂 '+csvPosts.length+' posts loaded</div>';
+    if(csvPosts.length>=2){
+      const avg=k=>Math.round(csvPosts.reduce((s,p)=>s+(p[k]||0),0)/csvPosts.length);
+      document.getElementById('history-preview').style.display='block';
+      document.getElementById('history-mini-grid').innerHTML=hStat('Avg Likes',avg('likes'),'var(--pk)')+hStat('Avg Saves',avg('saves'),'var(--p)')+hStat('Avg Comments',avg('comments'),'var(--c)')+hStat('Avg Shares',avg('shares'),'var(--o)');
+    }
+  };
+  reader.readAsText(file);
+}
+function hStat(l,v,c){return'<div class="h-stat"><div class="h-stat-lbl">'+l+'</div><div class="h-stat-val" style="color:'+c+'">'+v+'</div></div>';}
+
+function getInputs(){
+  const keys=['likes','shares','follows','comments','profile_visits','caption_length','saves','reposts','hashtags'],d={};
+  keys.forEach(k=>{d[k]=parseInt(document.getElementById('in-'+k).value)||0;});
+  return d;
+}
+
+async function analyze(){
+  const btn=document.getElementById('analyze-btn');
+  btn.innerHTML='⏳ Analyzing…';btn.disabled=true;
+  go('dashboard');
+  document.getElementById('d-sub').textContent='Running pipeline…';
+  document.getElementById('d-viral-badge').style.display='none';
+  try{
+    const payload={...getInputs(),session_key:SESSION_KEY,extra_posts:csvPosts};
+    const res=await fetch('/api/analyze/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error('Server error '+res.status);
+    const data=await res.json();
+    populateDashboard(data); loadPredictHistory();
+  }catch(e){document.getElementById('d-sub').textContent='Error: '+e.message;}
+  finally{btn.innerHTML='🚀 Analyze Post';btn.disabled=false;}
+}
+
+function populateDashboard(d){
+  const ai=d.ai,imp=d.impressions,diff=imp-d.avg_impressions;
+  document.getElementById('d-sub').textContent=d.history_count+' post'+(d.history_count!==1?'s':'')+' analyzed · session '+SESSION_KEY.slice(0,10)+'…';
+  document.getElementById('d-impressions').textContent=imp.toLocaleString();
+  const impDeltaEl=document.getElementById('d-imp-sub');
+  impDeltaEl.textContent=(diff>=0?'▲ ':'▼ ')+Math.abs(diff).toLocaleString()+' '+(diff>=0?'more':'less')+' than your average';
+  impDeltaEl.className='r-m-delta '+(diff>=0?'delta-up':'delta-down');
+  impDeltaEl.style.display='inline-flex';
+  document.getElementById('d-viral').textContent=d.viral_score;
+  document.getElementById('d-eng').textContent=d.eng_rate+'%';
+  document.getElementById('d-follow').textContent=d.follow_rate+'%';
+
+  const badge=document.getElementById('d-viral-badge');
+  const vl=(ai&&ai.viral_label)?ai.viral_label:'Moderate Potential';
+  const isHigh=vl.includes('High'),isLow=vl.includes('Low');
+  const col=isHigh?'#4ade80':isLow?'#f87171':'#fb923c';
+  const bgCol=isHigh?'rgba(74,222,128,.07)':isLow?'rgba(248,113,113,.07)':'rgba(251,146,60,.07)';
+  const borderCol=isHigh?'rgba(74,222,128,.2)':isLow?'rgba(248,113,113,.2)':'rgba(251,146,60,.2)';
+  document.getElementById('v-emoji').textContent=isHigh?'🔥':isLow?'📉':'⚡';
+  document.getElementById('v-label').textContent=vl;
+  document.getElementById('v-label').style.color=col;
+  document.getElementById('v-explain').style.color=col;
+  document.getElementById('v-explain').textContent=isHigh?'Strong viral signals — double down on what\'s working.':isLow?'Needs changes — check the tips below.':'A few tweaks could push it significantly further.';
+  badge.style.background=bgCol;badge.style.borderColor=borderCol;
+  badge.style.display='flex';
+
+  document.getElementById('d-proj-current').textContent=imp.toLocaleString();
+  document.getElementById('d-proj-25').textContent=(ai&&ai.projected_25?ai.projected_25:Math.round(imp*1.25)).toLocaleString();
+  document.getElementById('d-proj-opt').textContent=(ai&&ai.projected_opt?ai.projected_opt:Math.round(imp*1.6)).toLocaleString();
+
+  const timeWhys={'Tuesday 7-9 PM':'Browse mode — people save things for later','Thursday 6-8 PM':'End-of-day scroll peak','Wednesday 12-2 PM':'Lunch break scroll','Sunday 8-10 PM':'Weekend wind-down browsing','Monday 8-10 AM':'Start-of-week motivation scroll','Friday 9-11 AM':'Pre-weekend browse','Wednesday 7-9 AM':'Morning commute peak','Saturday 10-12 PM':'Late morning leisure','Thursday 12-2 PM':'Midweek lunch window','Tuesday 6-8 PM':'After-work scroll','Saturday 11 AM-1 PM':'Weekend leisure peak','Sunday 5-7 PM':'Sunday afternoon relaxation','Friday 5-7 PM':'End-of-week celebration mode','Saturday 9-11 AM':'Weekend morning energy','Sunday 6-8 PM':'Sunday evening winding down','Monday 7-9 AM':'Week-start motivation','Wednesday 11 AM-1 PM':'Midweek lunch window','Friday 10 AM-12 PM':'Pre-weekend wind-up','Tuesday 5-7 PM':'After-work browse session','Thursday 8-10 AM':'Morning productivity peak'};
+  const times=(ai&&ai.best_times)?ai.best_times:[];
+  document.getElementById('d-times').innerHTML=times.map(t=>{
+    const isBest=t.label==='BEST',why=timeWhys[t.slot]||'High audience activity window';
+    return'<div class="r-time-item '+(isBest?'best':'')+'"><div><div class="r-time-slot">'+t.slot+'</div><div class="r-time-why">'+why+'</div></div><span class="r-time-tag '+(isBest?'tag-best':'tag-good')+'">'+(isBest?'🔥 Best':'Good')+'</span></div>';
+  }).join('');
+
+  const stratBox=document.getElementById('ai-strategy-box');
+  if(stratBox){
+    const diagnosis=(ai&&ai.diagnosis)?ai.diagnosis:null;
+    const levers=(ai&&ai.growth_levers)?ai.growth_levers:[];
+    const bestTime=(ai&&ai.best_time)?ai.best_time:null;
+    const leverColors=['#a78bfa','#2dd4bf','#fbbf24'];
+    const leverBgs=['rgba(167,139,250,.1)','rgba(45,212,191,.1)','rgba(251,191,36,.1)'];
+    const leverBorders=['rgba(167,139,250,.25)','rgba(45,212,191,.25)','rgba(251,191,36,.25)'];
+    const leverLabels=['Easy fix','1 min change','High impact'];
+    let html='';
+    if(diagnosis)html+='<div class="r-ai-block"><div class="r-ai-tag tag-diag">📊 What\'s happening with this post</div><div class="r-ai-text">'+diagnosis+'</div></div>';
+    if(levers.length){
+      html+='<div class="r-ai-block"><div class="r-ai-tag tag-lever">🚀 3 specific things to change</div><div class="r-lever-cards">';
+      levers.forEach((l,i)=>{html+='<div class="r-lever" style="border-left-color:'+leverColors[i%3]+';"><div class="r-lever-text">'+l+'</div><span class="r-lever-badge" style="background:'+leverBgs[i%3]+';color:'+leverColors[i%3]+';border:1px solid '+leverBorders[i%3]+';">'+leverLabels[i%3]+'</span></div>';});
+      html+='</div></div>';
+    }
+    if(bestTime)html+='<div class="r-ai-block" style="margin-bottom:0;"><div class="r-ai-tag tag-time-ai">🕐 When to post this type of content</div><div class="r-ai-text">'+bestTime+'</div></div>';
+    if(!html)html='<div style="color:#7070a0;font-size:12px;">No AI strategy available.</div>';
+    stratBox.innerHTML=html;
+  }
+
+  const fr=d.forecast_report;
+  if(fr){
+    document.getElementById('forecast-panel').style.display='block';
+    document.getElementById('forecast-headline').textContent='Looked at '+fr.post_count+' posts · Reach is '+fr.impression_trend+' · Saves trend '+fr.saves_ratio.direction+' · Next post forecast: '+fr.next_imp_forecast.toLocaleString()+' people';
+    document.getElementById('forecast-trends').innerHTML=trendChip(fr.impression_trend)+trendChip(fr.saves_ratio.direction)+trendChip(fr.engagement_velocity.direction);
+    document.getElementById('forecast-grid').innerHTML=fStat('Next post reach',fr.next_imp_forecast.toLocaleString())+fStat('Next quality score',fr.next_viral_forecast+'/100')+fStat('Best hashtag count',fr.opt_hashtags)+fStat('Consistency',fr.engagement_velocity.consistency);    document.getElementById('next-forecast-row').style.display='flex';
+    document.getElementById('d-next-forecast').textContent=fr.next_imp_forecast.toLocaleString();
+    renderTrendCharts(fr);
+  }else{
+    document.getElementById('forecast-panel').style.display='none';
+    document.getElementById('next-forecast-row').style.display='none';
+  }
+  renderCharts([d.inputs.likes,d.inputs.saves,d.inputs.comments,d.inputs.shares],[d.avgs.likes,d.avgs.saves,d.avgs.comments,d.avgs.shares],[d.inputs.likes,d.inputs.saves,d.inputs.comments,d.inputs.shares,d.inputs.follows]);
+}
+
+function trendChip(t){const cls=t==='improving'?'up':t==='declining'?'down':'stable',icon=t==='improving'?'↑':t==='declining'?'↓':'→';return'<div class="trend '+cls+'">'+icon+' '+t+'</div>';}
+function fStat(l,v){return'<div class="r-f-stat"><div class="r-f-lbl">'+l+'</div><div class="r-f-val">'+v+'</div></div>';}
+
+function renderCharts(thisPost,avgPost,radarData){
+  const gc='rgba(255,255,255,.04)';
+  Chart.defaults.color='rgba(175,175,215,.45)';Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,sans-serif';Chart.defaults.font.size=10;
+  if(barChartInst){barChartInst.destroy();barChartInst=null;}
+  if(radarChartInst){radarChartInst.destroy();radarChartInst=null;}
+  barChartInst=new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:['Likes','Saves','Comments','Shares'],datasets:[{label:'This Post',data:thisPost,backgroundColor:'rgba(168,85,247,.5)',borderColor:'rgba(168,85,247,.8)',borderWidth:1,borderRadius:4},{label:'Avg',data:avgPost,backgroundColor:'rgba(6,182,212,.4)',borderColor:'rgba(6,182,212,.7)',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,padding:8,font:{size:10}}}},scales:{x:{grid:{color:gc},ticks:{maxRotation:0}},y:{grid:{color:gc}}}}});
+  radarChartInst=new Chart(document.getElementById('radarChart'),{type:'radar',data:{labels:['Likes','Saves','Comments','Shares','Follows'],datasets:[{data:radarData,backgroundColor:'rgba(168,85,247,.1)',borderColor:'rgba(168,85,247,.6)',pointBackgroundColor:'rgba(168,85,247,.9)',borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{grid:{color:gc},angleLines:{color:'rgba(255,255,255,.05)'},ticks:{display:false},pointLabels:{color:'rgba(175,175,215,.45)',font:{size:10}}}}}});
+}
+
+function renderTrendCharts(fr){
+  const gc='rgba(255,255,255,.04)';
+  if(trendChartInst){trendChartInst.destroy();trendChartInst=null;}
+  if(savesRatioChartInst){savesRatioChartInst.destroy();savesRatioChartInst=null;}
+  const n=fr.imp_smoothed.length,labels=Array.from({length:n},(_,i)=>'Post '+(i+1));
+  trendChartInst=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels,datasets:[{label:'Smoothed',data:fr.imp_smoothed,borderColor:'rgba(168,85,247,.8)',backgroundColor:'rgba(168,85,247,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,padding:8,font:{size:10}}}},scales:{x:{grid:{color:gc}},y:{grid:{color:gc}}}}});
+  savesRatioChartInst=new Chart(document.getElementById('savesRatioChart'),{type:'line',data:{labels,datasets:[{label:'Saves/Likes',data:fr.saves_ratio.values,borderColor:'rgba(52,211,153,.8)',backgroundColor:'rgba(52,211,153,.08)',fill:true,tension:.4,borderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8,padding:8,font:{size:10}}}},scales:{x:{grid:{color:gc}},y:{grid:{color:gc},min:0}}}});
+}
+
+async function loadPredictHistory(){
+  const el=document.getElementById('predict-history-content');if(!el)return;
+  el.innerHTML='<span style="color:var(--mu);">Loading…</span>';
+  try{
+    const res=await fetch('/api/history/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_key:SESSION_KEY})});
+    const data=await res.json();
+    if(!data.posts||data.posts.length===0){el.innerHTML='<span style="color:var(--mu);">No posts yet — analyze one to build history.</span>';return;}
+    const recent=data.posts.slice(-5).reverse();
+    el.innerHTML=recent.map(p=>{
+      const vl=p.ai_viral_label||'–',col=vl.includes('High')?'var(--g)':vl.includes('Low')?'var(--r)':'var(--o)';
+      return'<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin:3px 0;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:7px;"><span><span style="color:var(--pk);">❤ '+p.likes+'</span> &nbsp;<span style="color:var(--p);">🔖 '+p.saves+'</span> &nbsp;<span style="color:var(--c);">💬 '+p.comments+'</span></span><span style="color:var(--g);font-weight:700;">'+(p.predicted_impressions||0).toLocaleString()+' imp</span><span class="badge-sm" style="color:'+col+';border-color:'+col+'">'+vl+'</span></div>';
+    }).join('')+'<div style="color:var(--mu);font-size:10px;margin-top:5px;">'+data.count+' total posts stored</div>';
+  }catch(e){el.innerHTML='<span style="color:var(--mu);">No history yet.</span>';}
+}
+
+async function loadHistory(){
+  document.getElementById('history-content').innerHTML='<div style="color:var(--mu);font-size:12px;">Loading...</div>';
+  try{
+    const res=await fetch('/api/history/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_key:SESSION_KEY})});
+    renderHistory(await res.json());
+  }catch(e){document.getElementById('history-content').innerHTML='<div style="color:var(--r);font-size:12px;">Error: '+e.message+'</div>';}
+}
+
+async function clearHistory(){
+  if(!confirm('Clear all post history for this session?'))return;
+  await fetch('/api/clear/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_key:SESSION_KEY})});
+  loadHistory(); loadPredictHistory();
+}
+
+function renderHistory(data){
+  if(!data.posts||data.posts.length===0){document.getElementById('history-content').innerHTML='<div style="color:var(--mu);font-size:12px;">No posts yet. Analyze a post to build history.</div>';return;}
+  const rows=data.posts.map(p=>{
+    const vl=p.ai_viral_label||'–',col=vl.includes('High')?'var(--g)':vl.includes('Low')?'var(--r)':'var(--o)';
+    return'<tr><td style="color:var(--pk);">'+p.likes+'</td><td style="color:var(--p);">'+p.saves+'</td><td style="color:var(--c);">'+p.comments+'</td><td style="color:var(--o);">'+p.shares+'</td><td style="color:var(--g);">'+(p.predicted_impressions||0).toLocaleString()+'</td><td style="color:var(--c);">'+(p.viral_score||0)+'</td><td><span class="badge-sm" style="color:'+col+';border-color:'+col+';background:'+col.replace('var(--','rgba(').replace(')','.1)')+'">'+vl+'</span></td></tr>';
+  }).join('');
+  document.getElementById('history-content').innerHTML='<div style="font-size:11px;color:var(--mu);margin-bottom:10px;">'+data.count+' posts stored · Session: '+SESSION_KEY.slice(0,14)+'…</div><div style="overflow-x:auto;"><table class="history-table"><thead><tr><th>Likes</th><th>Saves</th><th>Comments</th><th>Shares</th><th>Pred. Impressions</th><th>Viral Score</th><th>Label</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+async function initAgent(){
+  try{
+    const res=await fetch('/api/history/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_key:SESSION_KEY})});
+    const data=await res.json(),count=data.count||0,posts=data.posts||[];
+    document.getElementById('ctx-posts').textContent=count+(count===1?' post':' posts')+' in memory';
+    document.getElementById('ctx-posts').className='agent-ctx-chip '+(count>0?'ctx-green':'ctx-purple');
+    if(count>=2)document.getElementById('ctx-forecast').style.display='inline-flex';
+    if(count>0&&posts.length>0){
+      const last=posts[posts.length-1],chip=document.getElementById('ctx-score');
+      chip.style.display='inline-flex';chip.textContent='⚡ Last score: '+(last.viral_score||0).toFixed(1)+'/100';chip.className='agent-ctx-chip ctx-blue';
+      document.getElementById('ctx-label').textContent=count+' posts analyzed · Forecasting model ready · Ask me anything';
+    }
+    if(!agentCtxLoaded&&count===0)document.getElementById('agent-welcome-sub').textContent='No post history yet — analyze a post first, or ask me general Instagram strategy questions.';
+    agentCtxLoaded=true;
+  }catch(e){}
+}
+
+function sendSuggestion(el){document.getElementById('agent-input').value=el.textContent;sendAgent();}
+
+async function sendAgent(){
+  const input=document.getElementById('agent-input'),text=input.value.trim();
+  if(!text)return;
+  const welcome=document.getElementById('agent-welcome');if(welcome)welcome.remove();
+  input.value='';input.style.height='auto';
+  appendMsg('user',text);agentHistory.push({role:'user',content:text});
+  const btn=document.getElementById('agent-send-btn');btn.disabled=true;
+  const typingId='typing-'+Date.now(),msgsEl=document.getElementById('agent-msgs');
+  msgsEl.innerHTML+='<div class="msg" id="'+typingId+'"><div class="msg-avatar ai">🤖</div><div class="msg-bubble ai"><div class="typing"><span></span><span></span><span></span></div></div></div>';
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+  try{
+    const res=await fetch('/api/agent/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history:agentHistory.slice(-12),session_key:SESSION_KEY})});
+    const data=await res.json(),reply=data.reply||'Sorry, I couldn\'t generate a response.';
+    document.getElementById(typingId)?.remove();appendMsg('ai',reply);agentHistory.push({role:'assistant',content:reply});
+  }catch(e){document.getElementById(typingId)?.remove();appendMsg('ai','Connection error — make sure your Django server is running.');}
+  btn.disabled=false;msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+function appendMsg(role,text){
+  const msgsEl=document.getElementById('agent-msgs'),isAI=role==='ai';
+  msgsEl.innerHTML+='<div class="msg '+role+'"><div class="msg-avatar '+role+'">'+( isAI?'🤖':'👤')+'</div><div class="msg-bubble '+role+'">'+( isAI?formatAIMessage(text):escapeHtml(text))+'</div></div>';
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+
+function formatAIMessage(text){
+  let h=escapeHtml(text);
+  h=h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/^\d+\.\s+(.+)$/gm,'<li>$1</li>');
+  h=h.replace(/(<li>[\s\S]*?<\/li>)+/g,s=>'<ul>'+s+'<\/ul>');
+  h=h.replace(/^[-•]\s+(.+)$/gm,'<li>$1</li>');
+  h=h.replace(/(\d[\d,]*\.?\d*)\s*(saves|likes|comments|shares|impressions|followers|%|\/100)/gi,'<span class="ai-num">$1 $2</span>');
+  h=h.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+  return h;
+}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+</script>
+</body>
+</html>
