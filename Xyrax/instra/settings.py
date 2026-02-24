@@ -22,7 +22,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'Xyrax.instra.urls'
+ROOT_URLCONF = 'instra.urls'
 
 TEMPLATES = [
     {
@@ -37,7 +37,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Xyrax.instra.wsgi.application'
+WSGI_APPLICATION = 'instra.wsgi.application'
 
 DATABASES = {
     'default': {
