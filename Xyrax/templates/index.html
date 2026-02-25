@@ -317,25 +317,21 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         </div>
       </div>
 
-      <!-- DASHBOARD (redesigned) -->
+      <!-- DASHBOARD -->
       <div class="page" id="page-dashboard" style="padding:0;overflow-y:auto;">
       <style>
-        /* ── Redesigned dashboard styles ── */
         #page-dashboard { font-family:'Instrument Sans','Segoe UI',sans-serif; }
         #page-dashboard .r-wrap { max-width:860px; margin:0 auto; padding:28px 24px 60px; }
         #page-dashboard .r-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap; }
         #page-dashboard .r-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:24px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#e8e8f0,rgba(255,255,255,.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px; }
         #page-dashboard .r-meta { font-size:12px;color:#7070a0; }
-        /* verdict banner */
         #page-dashboard .verdict-banner { border-radius:14px;padding:14px 20px;margin-bottom:22px;display:flex;align-items:center;gap:14px;animation:rSlideIn .4s ease; }
         @keyframes rSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
         #page-dashboard .v-emoji { font-size:26px;flex-shrink:0; }
         #page-dashboard .v-label { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:17px;font-weight:800;letter-spacing:-.2px; }
         #page-dashboard .v-explain { font-size:11px;margin-top:2px;opacity:.65; }
-        /* section label */
         #page-dashboard .r-section { font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3a3a5c;margin-bottom:11px;margin-top:26px;display:flex;align-items:center;gap:8px; }
         #page-dashboard .r-section::after { content:'';flex:1;height:1px;background:rgba(255,255,255,.07); }
-        /* metric cards */
         #page-dashboard .r-metrics { display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:9px; }
         #page-dashboard .r-metric { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 14px;position:relative;overflow:hidden;transition:transform .2s;animation:rFadeUp .5s ease both; }
         #page-dashboard .r-metric:hover { transform:translateY(-2px); }
@@ -352,20 +348,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         #page-dashboard .r-m-delta { display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-top:6px; }
         #page-dashboard .delta-up { background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2); }
         #page-dashboard .delta-down { background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2); }
-        /* two col */
         #page-dashboard .r-two { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
-        /* panel */
         #page-dashboard .r-panel { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 18px; }
         #page-dashboard .r-panel-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:13px;font-weight:800;letter-spacing:-.2px;margin-bottom:3px; }
         #page-dashboard .r-panel-sub { font-size:11px;color:#7070a0;margin-bottom:14px; }
-        /* projections */
         #page-dashboard .r-proj-item { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05); }
         #page-dashboard .r-proj-item:last-child { border-bottom:none; }
         #page-dashboard .r-proj-label { font-size:11px;color:#7070a0;min-width:120px; }
         #page-dashboard .r-proj-bar-wrap { flex:1;background:rgba(255,255,255,.04);border-radius:99px;height:5px;overflow:hidden; }
         #page-dashboard .r-proj-bar { height:100%;border-radius:99px;transition:width 1s cubic-bezier(.22,1,.36,1); }
         #page-dashboard .r-proj-val { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-weight:800;font-size:13px;min-width:58px;text-align:right; }
-        /* times */
         #page-dashboard .r-time-item { display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-radius:9px;margin-bottom:5px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);transition:background .2s; }
         #page-dashboard .r-time-item.best { background:rgba(45,212,191,.05);border-color:rgba(45,212,191,.15); }
         #page-dashboard .r-time-slot { font-size:12px;font-weight:600; }
@@ -373,7 +365,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         #page-dashboard .r-time-tag { font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:99px; }
         #page-dashboard .tag-best { background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.25); }
         #page-dashboard .tag-good { background:rgba(255,255,255,.04);color:#7070a0;border:1px solid rgba(255,255,255,.07); }
-        /* forecast panel */
         #page-dashboard .r-forecast { background:rgba(74,222,128,.03);border:1px solid rgba(74,222,128,.12);border-radius:14px;padding:13px 16px;margin-bottom:9px; }
         #page-dashboard .r-forecast-head { display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px; }
         #page-dashboard .r-forecast-title { font-size:11px;font-weight:700;color:#4ade80; }
@@ -383,7 +374,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         #page-dashboard .r-f-lbl { font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:#7070a0;margin-bottom:2px; }
         #page-dashboard .r-f-val { font-size:15px;font-weight:800;color:#4ade80; }
         #page-dashboard .r-charts-row { display:grid;grid-template-columns:3fr 2fr;gap:8px;margin-bottom:9px; }
-        /* ai section */
         #page-dashboard .r-ai { background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.15);border-radius:15px;padding:18px 20px;margin-bottom:9px;position:relative;overflow:hidden; }
         #page-dashboard .r-ai::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.5),transparent); }
         #page-dashboard .r-ai-block { margin-bottom:18px; }
@@ -397,7 +387,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         #page-dashboard .r-lever { background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 13px;border-left:3px solid;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start; }
         #page-dashboard .r-lever-text { font-size:12px;line-height:1.6;color:rgba(232,232,240,.85); }
         #page-dashboard .r-lever-badge { font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:99px;white-space:nowrap; }
-        /* chart panels */
         #page-dashboard .r-chart-panel { background:#181826;border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:16px 18px; }
         #page-dashboard .r-chart-title { font-family:'Cabinet Grotesk',-apple-system,sans-serif;font-size:12px;font-weight:800;margin-bottom:2px; }
         #page-dashboard .r-chart-sub { font-size:10px;color:#7070a0;margin-bottom:12px; }
@@ -406,15 +395,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </style>
 
       <div class="r-wrap">
-        <!-- Header -->
         <div class="r-header">
           <div>
             <div class="r-title">Your Post Report</div>
             <div class="r-meta" id="d-sub">Run a post analysis to see your results</div>
           </div>
         </div>
-
-        <!-- Verdict banner -->
         <div class="verdict-banner" id="d-viral-badge" style="display:none;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);">
           <div class="v-emoji" id="v-emoji">⚡</div>
           <div>
@@ -422,8 +408,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="v-explain" id="v-explain" style="color:#fb923c;">Your post is doing okay — a few tweaks could push it further.</div>
           </div>
         </div>
-
-        <!-- Metric cards -->
         <div class="r-section">What your post scored</div>
         <div class="r-metrics">
           <div class="r-metric" style="--rm-accent:linear-gradient(90deg,#a78bfa,#60a5fa);">
@@ -452,8 +436,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="r-m-plain">Of profile visitors from this post who hit Follow.</div>
           </div>
         </div>
-
-        <!-- Forecast panel (multi-post) -->
         <div id="forecast-panel" style="display:none;">
           <div class="r-section">Patterns across all your posts</div>
           <div class="r-forecast">
@@ -468,11 +450,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="r-chart-panel"><div class="r-chart-title">Are people bookmarking more?</div><div class="r-chart-sub">Saves/likes ratio over time</div><div class="r-chart-wrap-tall"><canvas id="savesRatioChart"></canvas></div></div>
           </div>
         </div>
-
-        <!-- Growth & timing -->
         <div class="r-section">Growth & best timing</div>
         <div class="r-two">
-          <!-- Projections -->
           <div class="r-panel">
             <div class="r-panel-title">📈 What improvement looks like</div>
             <div class="r-panel-sub">If you follow the tips below, here's how your reach could grow</div>
@@ -497,21 +476,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
               <div class="r-proj-val" id="d-next-forecast" style="color:#fb923c;">–</div>
             </div>
           </div>
-          <!-- Best times -->
           <div class="r-panel">
             <div class="r-panel-title">🕐 When to post next</div>
             <div class="r-panel-sub">Your audience is most active and save-happy at these times</div>
             <div id="d-times"></div>
           </div>
         </div>
-
-        <!-- AI Strategy -->
         <div class="r-section">AI growth strategy</div>
         <div class="r-ai" id="ai-strategy-box">
           <div style="color:#7070a0;font-size:12px;">Run an analysis to see your AI strategy.</div>
         </div>
-
-        <!-- Charts -->
         <div class="r-section">This post vs your historical average</div>
         <div class="r-two">
           <div class="r-chart-panel">
@@ -525,8 +499,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
             <div class="r-chart-wrap"><canvas id="radarChart"></canvas></div>
           </div>
         </div>
-
-      </div><!-- /r-wrap -->
+      </div>
       </div>
 
       <!-- HISTORY -->
@@ -581,7 +554,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <script>
 const NC = {home:'#a855f7', predict:'#06b6d4', dashboard:'#fb923c', history:'#f472b6', agent:'#a78bfa'};
 let barChartInst=null,radarChartInst=null,trendChartInst=null,savesRatioChartInst=null;
-let csvPosts=[], agentHistory=[], agentCtxLoaded=false;
+// ── FIX 1: added lastAnalysisResult to store ML output for agent context ──
+let csvPosts=[], agentHistory=[], agentCtxLoaded=false, lastAnalysisResult=null;
 let SESSION_KEY=localStorage.getItem('instra_session');
 if(!SESSION_KEY){SESSION_KEY='sess_'+Math.random().toString(36).slice(2)+Date.now();localStorage.setItem('instra_session',SESSION_KEY);}
 
@@ -652,6 +626,8 @@ async function analyze(){
     const res=await fetch('/api/analyze/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!res.ok)throw new Error('Server error '+res.status);
     const data=await res.json();
+    // ── FIX 2: store full analysis result so agent always has fresh ML context ──
+    lastAnalysisResult=data;
     populateDashboard(data); loadPredictHistory();
   }catch(e){document.getElementById('d-sub').textContent='Error: '+e.message;}
   finally{btn.innerHTML='🚀 Analyze Post';btn.disabled=false;}
@@ -720,7 +696,8 @@ function populateDashboard(d){
     document.getElementById('forecast-panel').style.display='block';
     document.getElementById('forecast-headline').textContent='Looked at '+fr.post_count+' posts · Reach is '+fr.impression_trend+' · Saves trend '+fr.saves_ratio.direction+' · Next post forecast: '+fr.next_imp_forecast.toLocaleString()+' people';
     document.getElementById('forecast-trends').innerHTML=trendChip(fr.impression_trend)+trendChip(fr.saves_ratio.direction)+trendChip(fr.engagement_velocity.direction);
-    document.getElementById('forecast-grid').innerHTML=fStat('Next post reach',fr.next_imp_forecast.toLocaleString())+fStat('Next quality score',fr.next_viral_forecast+'/100')+fStat('Best hashtag count',fr.opt_hashtags)+fStat('Consistency',fr.engagement_velocity.consistency);    document.getElementById('next-forecast-row').style.display='flex';
+    document.getElementById('forecast-grid').innerHTML=fStat('Next post reach',fr.next_imp_forecast.toLocaleString())+fStat('Next quality score',fr.next_viral_forecast+'/100')+fStat('Best hashtag count',fr.opt_hashtags)+fStat('Consistency',fr.engagement_velocity.consistency);
+    document.getElementById('next-forecast-row').style.display='flex';
     document.getElementById('d-next-forecast').textContent=fr.next_imp_forecast.toLocaleString();
     renderTrendCharts(fr);
   }else{
@@ -819,7 +796,14 @@ async function sendAgent(){
   msgsEl.innerHTML+='<div class="msg" id="'+typingId+'"><div class="msg-avatar ai">🤖</div><div class="msg-bubble ai"><div class="typing"><span></span><span></span><span></span></div></div></div>';
   msgsEl.scrollTop=msgsEl.scrollHeight;
   try{
-    const res=await fetch('/api/agent/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,history:agentHistory.slice(-12),session_key:SESSION_KEY})});
+    // ── FIX 3: pass last_ai and forecast_report so every message has full ML context ──
+    const res=await fetch('/api/agent/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      message:text,
+      history:agentHistory.slice(-12),
+      session_key:SESSION_KEY,
+      last_ai: lastAnalysisResult ? lastAnalysisResult.ai : null,
+      forecast_report: lastAnalysisResult ? lastAnalysisResult.forecast_report : null
+    })});
     const data=await res.json(),reply=data.reply||'Sorry, I couldn\'t generate a response.';
     document.getElementById(typingId)?.remove();appendMsg('ai',reply);agentHistory.push({role:'assistant',content:reply});
   }catch(e){document.getElementById(typingId)?.remove();appendMsg('ai','Connection error — make sure your Django server is running.');}
