@@ -3,33 +3,7 @@
 The system integrates a machine learning prediction pipeline with a Django-based backend that manages analytics processing, API communication, and historical data storage. This architecture enables engagement data to be analyzed, stored, and interpreted through a scalable analytics platform.
 
 The backend is organized into modular components responsible for prediction, analytics computation, and API communication.
-
----v
-
-### Project Structure
-INSTAGRAM_REACH/
-│
-├── analytics/ # Core analytics application
-│ ├── engine.py # Engagement analytics & prediction logic
-│ ├── models.py # Database schema
-│ ├── views.py # API endpoints
-│ └── urls.py # Routing
-│
-├── instra/ # Django project configuration
-│ ├── settings.py
-│ ├── urls.py
-│ └── wsgi.py
-│
-├── templates/
-│ └── index.html # Web interface
-│
-├── Instagram Reach Viral Prediction.ipynb # ML experimentation & training
-├── Instagram_Data.csv # Dataset
-├── db.sqlite3 # SQLite database
-├── manage.py # Django management script
-└── requirements.txt # Project dependencies
 ---
-
 ## Database Design
 
 The platform uses **SQLite** as a lightweight database to store historical post analytics.
