@@ -9,26 +9,25 @@ The backend is organized into modular components responsible for prediction, ana
 ### Project Structure
 INSTAGRAM_REACH/
 │
-├── analytics/                # Core analytics app
-│   ├── engine.py             # Engagement analytics & prediction logic
-│   ├── models.py             # Database schema
-│   ├── views.py              # API endpoints
-│   └── urls.py               # Routing
+├── analytics/ # Core analytics application
+│ ├── engine.py # Engagement analytics & prediction logic
+│ ├── models.py # Database schema
+│ ├── views.py # API endpoints
+│ └── urls.py # Routing
 │
-├── instra/                   # Django project configuration
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
+├── instra/ # Django project configuration
+│ ├── settings.py
+│ ├── urls.py
+│ └── wsgi.py
 │
 ├── templates/
-│   └── index.html            # Web interface
+│ └── index.html # Web interface
 │
-├── Instagram Reach Viral Prediction.ipynb   # ML training pipeline
-├── Instagram_Data.csv                       # Dataset
-├── db.sqlite3                               # Database
-├── manage.py                                # Django management script
-└── requirements.txt                         # Dependencies
-
+├── Instagram Reach Viral Prediction.ipynb # ML experimentation & training
+├── Instagram_Data.csv # Dataset
+├── db.sqlite3 # SQLite database
+├── manage.py # Django management script
+└── requirements.txt # Project dependencies
 ---
 
 ## Database Design
